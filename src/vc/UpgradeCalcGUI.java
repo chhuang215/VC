@@ -2,7 +2,6 @@ package vc;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -11,16 +10,13 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JList;
+
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.plaf.basic.BasicComboBoxRenderer;
 
 public class UpgradeCalcGUI extends JFrame {
 	
@@ -31,11 +27,12 @@ public class UpgradeCalcGUI extends JFrame {
 	private JComboBox<Integer> jcbToLevel;
 	private JTextArea jtaResult;
 	private JButton jbCalculate;
+	private JButton jbAddCards;
 	
 	public UpgradeCalcGUI()  {
 		setTitle("Upgrade Calculater");
 		setLayout(new BorderLayout());
-		setSize(300,300);
+		setSize(350,300);
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLocationRelativeTo(null);
@@ -43,23 +40,30 @@ public class UpgradeCalcGUI extends JFrame {
 		JPanel jpMain = new JPanel(new BorderLayout());
 		
 		initializeComponents();
+		JPanel jpCenter = new JPanel(new BorderLayout());
+		JPanel jpWest = new JPanel();
+		jpWest.setLayout(new FlowLayout(FlowLayout.LEFT));
+		jpWest.setPreferredSize(new Dimension(135, (int)jpWest.getPreferredSize().getHeight()));
+		
 		
 		JPanel jpFrom = new JPanel(new GridLayout(0,1));
 		JPanel jpTo = new JPanel(new GridLayout(0,1));
-		JPanel jpInput = new JPanel();
-		jpInput.setLayout(new FlowLayout(FlowLayout.LEFT));
-		jpInput.setPreferredSize(new Dimension(100, (int)jpInput.getPreferredSize().getHeight()));
+		
 		jpFrom.add(jlFrom);
 		jpFrom.add(jcbFromLevel);
 		jpTo.add(jlTo);
 		jpTo.add(jcbToLevel);
 		
-		jpInput.add(jpFrom);
-		jpInput.add(jpTo);
-		jpInput.add(jbCalculate);
+		jpWest.add(jpFrom);
+		jpWest.add(jpTo);
+		jpWest.add(jbCalculate);
+		jpWest.add(jbAddCards);
 		
-		jpMain.add(jpInput, BorderLayout.WEST);
-		jpMain.add(jtaResult, BorderLayout.CENTER);
+		
+		jpCenter.add(jtaResult, BorderLayout.CENTER);
+		
+		jpMain.add(jpWest, BorderLayout.WEST);
+		jpMain.add(jpCenter, BorderLayout.CENTER);
 		
 		getContentPane().add(jpMain, BorderLayout.CENTER);
 		
@@ -107,14 +111,13 @@ public class UpgradeCalcGUI extends JFrame {
 			}
 		});
 		
+		jbAddCards = new JButton("Cards to Use");
+		jbAddCards.setVisible(false);
 	}
 	
 	private void checkValidSelection(){
 		if(jcbFromLevel.getSelectedIndex() > jcbToLevel.getSelectedIndex()){
-			jbCalculate.setEnabled(false);
-		}
-		else{
-			jbCalculate.setEnabled(true);
+			jcbToLevel.setSelectedIndex(jcbFromLevel.getSelectedIndex());
 		}
 	}
 
@@ -122,7 +125,8 @@ public class UpgradeCalcGUI extends JFrame {
 		int expNeeded = Card.getNeededExp(to) - Card.getNeededExp(from);
 		int levelOfSlime = 30;
 		
-		int expOfSlime = Card.SLIME_BASE_EXP + (int)(Card.getNeededExp(levelOfSlime) * 1.25);
+		int expOfSlime = Card.slimeExp(levelOfSlime);
+		Card.slimeExp(30);
 		int slimeNeeded = 0;
 		int nCardNeeded = 0;
 		
