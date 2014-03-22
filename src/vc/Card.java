@@ -70,4 +70,16 @@ public class Card {
 		return (int)result; 
 	}
 	
+	public static Integer[] getLevelsArray(int max){
+		Integer[] lvls = new Integer[max];
+		for(int i = 1; i <= lvls.length; i++){
+			lvls[i-1] = i;
+		}
+		
+		return lvls;
+	}
+	
+	public static Integer[] getLevelsArray(){
+		return getLevelsArray(80);
+	}
 }

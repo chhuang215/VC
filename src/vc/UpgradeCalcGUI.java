@@ -9,12 +9,12 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.LinkedList;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 
@@ -28,11 +28,12 @@ public class UpgradeCalcGUI extends JFrame {
 	private JTextArea jtaResult;
 	private JButton jbCalculate;
 	private JButton jbAddCards;
+	private CardsListPanel pCardList;
 	
 	public UpgradeCalcGUI()  {
 		setTitle("Upgrade Calculater");
 		setLayout(new BorderLayout());
-		setSize(350,300);
+		setSize(730,580);
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLocationRelativeTo(null);
@@ -59,7 +60,7 @@ public class UpgradeCalcGUI extends JFrame {
 		jpWest.add(jbCalculate);
 		jpWest.add(jbAddCards);
 		
-		
+		jpCenter.add(pCardList, BorderLayout.WEST);
 		jpCenter.add(jtaResult, BorderLayout.CENTER);
 		
 		jpMain.add(jpWest, BorderLayout.WEST);
@@ -72,23 +73,22 @@ public class UpgradeCalcGUI extends JFrame {
 	
 	private void initializeComponents(){
 	
+		pCardList = new CardsListPanel();
+		
 		jlFrom = new JLabel("From level");
 		jlFrom.setPreferredSize(new Dimension(90, jlFrom.getHeight()));
 		jlTo = new JLabel("To level");
 		jlTo.setPreferredSize(jlFrom.getPreferredSize());
 		
-		Integer[] lvls = new Integer[80];
-		for(int i = 1; i <= lvls.length; i++){
-			lvls[i-1] = i;
-		}
-		jcbFromLevel = new JComboBox<Integer>(lvls);
+
+		jcbFromLevel = new JComboBox<Integer>(Card.getLevelsArray());
 		jcbFromLevel.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				checkValidSelection();
 			}
 		});
-		jcbToLevel = new JComboBox<Integer>(lvls);
+		jcbToLevel = new JComboBox<Integer>(Card.getLevelsArray());
 		jcbToLevel.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -113,6 +113,8 @@ public class UpgradeCalcGUI extends JFrame {
 		
 		jbAddCards = new JButton("Cards to Use");
 		jbAddCards.setVisible(false);
+		
+		
 	}
 	
 	private void checkValidSelection(){
@@ -122,11 +124,45 @@ public class UpgradeCalcGUI extends JFrame {
 	}
 
 	private void calculate(int from, int to){
+		LinkedList<Card> cards = pCardList.getCardList();
+		int expHave = 0;
+		jtaResult.setText("");
+		
+		
+		if(!cards.isEmpty()){
+			for(int i = 0; i < cards.size(); i++){
+				Card c = cards.get(i);
+				switch(c.getType()){
+					case Card.N: 
+						expHave += Card.nExp(c.getLevel());
+						break;
+					case Card.HN:
+	
+						expHave += Card.hnExp(c.getLevel());
+						break;
+					case Card.R:
+	
+						expHave += Card.rExp(c.getLevel());
+						break;
+					case Card.SLIME:
+	
+						expHave += Card.slimeExp(c.getLevel());
+						break;
+					case Card.METAL_SLIME:
+	
+						expHave += Card.mslimeExp(c.getLevel());
+						break;
+				}
+				
+			}
+	
+			jtaResult.append("Exp have: " + expHave + "\n\n");
+		}
+		
 		int expNeeded = Card.getNeededExp(to) - Card.getNeededExp(from);
 		int levelOfSlime = 30;
 		
 		int expOfSlime = Card.slimeExp(levelOfSlime);
-		Card.slimeExp(30);
 		int slimeNeeded = 0;
 		int nCardNeeded = 0;
 		
@@ -142,19 +178,23 @@ public class UpgradeCalcGUI extends JFrame {
 			}
 		}
 				
-		jtaResult.setText("");
+		
+		
 		jtaResult.append("Exp needed: " + expNeeded);
 		jtaResult.append("\n\n");
-		jtaResult.append(slimeNeeded + " [Lv.30 Slimes]\n");
-		jtaResult.append(nCardNeeded + " [Lv.1 N Cards]\n");
 		
-		slimeNeeded = 0;
-		expCalc = expNeeded;
-		while(expCalc > 0){
-			expCalc -= expOfSlime;
-			slimeNeeded++;
+		if(cards.size() <= 0){
+			jtaResult.append(slimeNeeded + " [Lv.30 Slimes]\n");
+			jtaResult.append(nCardNeeded + " [Lv.1 N Cards]\n");
+			
+			slimeNeeded = 0;
+			expCalc = expNeeded;
+			while(expCalc > 0){
+				expCalc -= expOfSlime;
+				slimeNeeded++;
+			}
+			jtaResult.append("\n     or\n\n");
+			jtaResult.append(slimeNeeded + " [Lv.30 Slimes]\n");
 		}
-		jtaResult.append("\n     or\n\n");
-		jtaResult.append(slimeNeeded + " [Lv.30 Slimes]\n");
 	}
 }
