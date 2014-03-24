@@ -1,29 +1,25 @@
 package vc;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 import java.util.LinkedList;
 
-import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.PlainDocument;
-
-import com.sun.org.apache.bcel.internal.generic.LSTORE;
 
 public class CardsListPanel extends JPanel{
 
@@ -33,15 +29,14 @@ public class CardsListPanel extends JPanel{
 	private JComboBox<Integer> jcbLevels;
 	private JTextField jtQuantity;
 	private JLabel jlblLvl;
-	private JButton jbAdd;
+	private JButton jbUse;
 	private JButton jbRemove;
-	private JButton jbRemoveAll;
-	private JList<String> jlstCardsList;
-	private DefaultListModel<String> dlmCardsList;
+	private JButton jbClear;
+	private JTable jtCardsTable;
+	private DefaultTableModel dtmCardsTable;
 	
 	public CardsListPanel(){
 		setLayout(new BorderLayout());
-		//setPreferredSize(new Dimension(130, this.getHeight()));;
 		initializeAttr();
 		JPanel jpNorth = new JPanel(new FlowLayout());
 		JPanel jpSouth = new JPanel(new GridLayout(1,2,5,5));
@@ -49,22 +44,27 @@ public class CardsListPanel extends JPanel{
 		jpNorth.add(jlblLvl);
 		jpNorth.add(jcbLevels);
 		jpNorth.add(jcbTypes);
-		jpNorth.add(jbAdd);
+		jpNorth.add(jbUse);
 		
 		jpSouth.add(jbRemove);
-		jpSouth.add(jbRemoveAll);
+		jpSouth.add(jbClear);
 		
+		JScrollPane jsTable = new JScrollPane(jtCardsTable);
+		jsTable.setPreferredSize(jtCardsTable.getPreferredSize());
+
 		this.add(jpNorth, BorderLayout.NORTH);
-		this.add(new JScrollPane(jlstCardsList), BorderLayout.CENTER);
+		this.add(jsTable, BorderLayout.CENTER);
 		this.add(jpSouth, BorderLayout.SOUTH);
 	}
+	
 	private void initializeAttr() {
 		cards = new LinkedList<Card>();
 		jtQuantity = new JTextField();
 		
-		jlblLvl = new JLabel("x Lv.");
+		jlblLvl = new JLabel("กั Lv.");
 		
-		jcbTypes = new JComboBox<String>(new String[]{"N", "HN", "R", "Slime", "M.Slime"});
+		jcbTypes = new JComboBox<String>(new String[]{"N Card", "HN Card", "R Card", "Slime", "M.Slime"});
+		jcbTypes.setSelectedItem("Slime");
 		jcbTypes.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -81,17 +81,35 @@ public class CardsListPanel extends JPanel{
 			}
 		});
 		
-		dlmCardsList = new DefaultListModel<String>();
-		jlstCardsList = new JList<String>(dlmCardsList);
-		jlstCardsList.setOpaque(false);
-	
-		jlstCardsList.setPrototypeCellValue("999 Lv.80 Metal Slime");
-		jlstCardsList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+		Object[] titles = {"Level", "Type", "Exp"};
+		Object[][] data = {};
+		dtmCardsTable = new DefaultTableModel(data,titles){
+			private static final long serialVersionUID = -1518928776476609615L;
+
+			@Override
+			public boolean isCellEditable(int row, int column) {
+				return false;
+			}
+		};
+		
+		
+		
+		jtCardsTable = new JTable(dtmCardsTable);
+		jtCardsTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+		jtCardsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		jtCardsTable.setRowSelectionAllowed(true);
+		jtCardsTable.setFocusable(false);
+		
 		
 		jtQuantity.setColumns(3);
 		jtQuantity.setFont(new Font(jtQuantity.getFont().getName(), Font.PLAIN, 15));
 		jtQuantity.setHorizontalAlignment(JTextField.RIGHT);
 		jtQuantity.setDocument(new PlainDocument(){
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -9014996937601801768L;
+
 			@Override
 			public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
 
@@ -110,8 +128,8 @@ public class CardsListPanel extends JPanel{
 		
 		jtQuantity.setText("1");
 		
-		jbAdd = new JButton("Add");
-		jbAdd.addActionListener(new ActionListener() {
+		jbUse = new JButton("Use");
+		jbUse.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -130,9 +148,8 @@ public class CardsListPanel extends JPanel{
 			}
 		});
 		
-		jbRemoveAll = new JButton("Remove All");
-		jbRemoveAll.addActionListener(new ActionListener() {
-			
+		jbClear = new JButton("Clear");
+		jbClear.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				cards.clear();
@@ -148,23 +165,24 @@ public class CardsListPanel extends JPanel{
 		}	
 	}
 	
-	public void refresh(){
-		dlmCardsList.clear();
+	private void refresh(){
+		dtmCardsTable.getDataVector().removeAllElements();
+		dtmCardsTable.fireTableDataChanged();
 		for(int i = 0; i < cards.size(); i++){
 			Card c = cards.get(i);
 			String type = "";
 			int exp = 0;
 			switch(c.getType()){
 				case Card.N: 
-					type = "N";
+					type = "N Card";
 					exp = Card.nExp(c.getLevel());
 					break;
 				case Card.HN:
-					type = "HN";
+					type = "HN Card";
 					exp = Card.hnExp(c.getLevel());
 					break;
 				case Card.R:
-					type = "R";
+					type = "R Card";
 					exp = Card.rExp(c.getLevel());
 					break;
 				case Card.SLIME:
@@ -176,7 +194,7 @@ public class CardsListPanel extends JPanel{
 					exp = Card.mslimeExp(c.getLevel());
 					break;
 			}
-			dlmCardsList.addElement("Lv." + c.getLevel() + " " + type + " card         exp." + exp);
+			dtmCardsTable.addRow(new Object[]{"Lv." + c.getLevel(), type, exp});
 		}
 	}
 	
@@ -196,10 +214,14 @@ public class CardsListPanel extends JPanel{
 	}
 	
 	public void removeCard(){
-		int index = jlstCardsList.getSelectedIndex();
+		int index = jtCardsTable.getSelectedRow();
 		if(index > -1){
 			cards.remove(index);
 			refresh();
+			if(jtCardsTable.getRowCount() > 0){
+				while(index >= jtCardsTable.getRowCount()) index--;
+				jtCardsTable.setRowSelectionInterval(index, index);
+			}
 		}
 	}
 	

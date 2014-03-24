@@ -97,6 +97,7 @@ public class UpgradeCalcGUI extends JFrame {
 		});
 		
 		jtaResult = new JTextArea();
+		jtaResult.setEditable(false);
 		jtaResult.setFont(new Font("Arial Unicode MS", Font.PLAIN, 14));
 		jtaResult.setMargin(new Insets(10,30,10,30));
 		jtaResult.setBackground(Color.LIGHT_GRAY);
@@ -122,7 +123,8 @@ public class UpgradeCalcGUI extends JFrame {
 			jcbToLevel.setSelectedIndex(jcbFromLevel.getSelectedIndex());
 		}
 	}
-
+	
+	
 	private void calculate(int from, int to){
 		LinkedList<Card> cards = pCardList.getCardList();
 		int expHave = 0;
@@ -160,8 +162,19 @@ public class UpgradeCalcGUI extends JFrame {
 		}
 		
 		int expNeeded = Card.getNeededExp(to) - Card.getNeededExp(from);
-		int levelOfSlime = 30;
 		
+		
+		jtaResult.append("Exp needed: " + expNeeded);
+		jtaResult.append("\n\n");
+		
+	
+	}
+	
+	private void calculateMinimunSlime(int expNeeded){
+		
+		int levelOfSlime = 1;
+		
+		int lv30Slime = Card.slimeExp(30);
 		int expOfSlime = Card.slimeExp(levelOfSlime);
 		int slimeNeeded = 0;
 		int nCardNeeded = 0;
@@ -177,24 +190,19 @@ public class UpgradeCalcGUI extends JFrame {
 				nCardNeeded = 0;
 			}
 		}
-				
 		
 		
-		jtaResult.append("Exp needed: " + expNeeded);
-		jtaResult.append("\n\n");
-		
-		if(cards.size() <= 0){
-			jtaResult.append(slimeNeeded + " [Lv.30 Slimes]\n");
-			jtaResult.append(nCardNeeded + " [Lv.1 N Cards]\n");
+		jtaResult.append(slimeNeeded + " [Lv." + levelOfSlime + " Slimes]\n");
+		jtaResult.append(nCardNeeded + " [Lv.1 N Cards]\n");
 			
-			slimeNeeded = 0;
-			expCalc = expNeeded;
-			while(expCalc > 0){
-				expCalc -= expOfSlime;
-				slimeNeeded++;
-			}
-			jtaResult.append("\n     or\n\n");
-			jtaResult.append(slimeNeeded + " [Lv.30 Slimes]\n");
+		slimeNeeded = 0;
+		expCalc = expNeeded;
+		while(expCalc > 0){
+			expCalc -= expOfSlime;
+			slimeNeeded++;
 		}
+		jtaResult.append("\n     or\n\n");
+		jtaResult.append(slimeNeeded + " [Lv.30 Slimes]\n");
+		
 	}
 }
