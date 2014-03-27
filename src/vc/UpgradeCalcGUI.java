@@ -60,11 +60,11 @@ public class UpgradeCalcGUI extends JFrame {
 		jpWest.add(jbCalculate);
 		jpWest.add(jbAddCards);
 		
-		jpCenter.add(pCardList, BorderLayout.WEST);
 		jpCenter.add(jtaResult, BorderLayout.CENTER);
 		
 		jpMain.add(jpWest, BorderLayout.WEST);
 		jpMain.add(jpCenter, BorderLayout.CENTER);
+		jpMain.add(pCardList, BorderLayout.EAST);
 		
 		getContentPane().add(jpMain, BorderLayout.CENTER);
 		
@@ -128,6 +128,7 @@ public class UpgradeCalcGUI extends JFrame {
 	private void calculate(int from, int to){
 		LinkedList<Card> cards = pCardList.getCardList();
 		int expHave = 0;
+		int stillNeeded = 0;
 		jtaResult.setText("");
 		
 		
@@ -167,7 +168,18 @@ public class UpgradeCalcGUI extends JFrame {
 		jtaResult.append("Exp needed: " + expNeeded);
 		jtaResult.append("\n\n");
 		
-	
+		stillNeeded = expNeeded - expHave;
+		
+		if(!cards.isEmpty()){
+			if(stillNeeded > 0 ){
+				jtaResult.append("Still need: " + stillNeeded);
+				jtaResult.append("\n\n");
+			}	
+			else{
+				jtaResult.append("Exp over " + (0-stillNeeded));
+				jtaResult.append("\n\n");
+			}
+		}
 	}
 	
 	private void calculateMinimunSlime(int expNeeded){

@@ -35,6 +35,12 @@ public class CardsListPanel extends JPanel{
 	private JTable jtCardsTable;
 	private DefaultTableModel dtmCardsTable;
 	
+	private Object[][] slimes;
+	private Object[][] nCards;
+	private Object[][] hnCards;
+	private Object[][] rCards;
+	private Object[][] mSlimes;
+	
 	public CardsListPanel(){
 		setLayout(new BorderLayout());
 		initializeAttr();
@@ -93,13 +99,12 @@ public class CardsListPanel extends JPanel{
 		};
 		
 		
-		
 		jtCardsTable = new JTable(dtmCardsTable);
 		jtCardsTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 		jtCardsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		jtCardsTable.setRowSelectionAllowed(true);
 		jtCardsTable.setFocusable(false);
-		
+		jtCardsTable.setShowVerticalLines(false);
 		
 		jtQuantity.setColumns(3);
 		jtQuantity.setFont(new Font(jtQuantity.getFont().getName(), Font.PLAIN, 15));
