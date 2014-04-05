@@ -39,8 +39,30 @@ public class Card {
 		return type;
 	}
 	
+	
+	/*****UTIL******/
+	
 	public static int getNeededExp(int level){
 		return EXP_CHART[level - 1];
+	}
+	
+	public static int getType(String t){
+
+		String temp = t.toLowerCase();
+		if(temp.startsWith("n")){
+			return N;
+		}else if(temp.startsWith("hn")){
+			return HN;
+		}else if(temp.startsWith("r")){
+			return R;
+		}else if(temp.startsWith("slime")){
+			return SLIME;
+		}else if(temp.startsWith("m")){
+			return METAL_SLIME;
+		}
+		
+		
+		return -1;
 	}
 	
 	public static int nExp(int level){

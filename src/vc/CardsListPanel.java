@@ -1,11 +1,14 @@
 package vc;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.LinkedList;
 
 import javax.swing.JButton;
@@ -24,69 +27,58 @@ import javax.swing.text.PlainDocument;
 public class CardsListPanel extends JPanel{
 
 	private static final long serialVersionUID = 1L;
+	
 	private LinkedList<Card> cards;
 	private JComboBox<String> jcbTypes;
-	private JComboBox<Integer> jcbLevels;
-	private JTextField jtQuantity;
-	private JLabel jlblLvl;
-	private JButton jbUse;
 	private JButton jbRemove;
 	private JButton jbClear;
-	private JTable jtCardsTable;
-	private DefaultTableModel dtmCardsTable;
 	
-	private Object[][] slimes;
-	private Object[][] nCards;
-	private Object[][] hnCards;
-	private Object[][] rCards;
-	private Object[][] mSlimes;
+	private JTable jtCardsTable;
+	private JTable jtSelectedTable;
+	private DefaultTableModel dtmCardsTable;
+	private DefaultTableModel dtmSelectedTable;
+	
 	
 	public CardsListPanel(){
 		setLayout(new BorderLayout());
 		initializeAttr();
-		JPanel jpNorth = new JPanel(new FlowLayout());
-		JPanel jpSouth = new JPanel(new GridLayout(1,2,5,5));
-		jpNorth.add(jtQuantity);
-		jpNorth.add(jlblLvl);
-		jpNorth.add(jcbLevels);
-		jpNorth.add(jcbTypes);
-		jpNorth.add(jbUse);
 		
-		jpSouth.add(jbRemove);
+		JPanel jpNorth = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		JPanel jpSouth = new JPanel(new GridLayout(1,2,5,5));
+		
+		jpNorth.add(jcbTypes);
+		//jpSouth.add(jbRemove);
 		jpSouth.add(jbClear);
 		
 		JScrollPane jsTable = new JScrollPane(jtCardsTable);
 		jsTable.setPreferredSize(jtCardsTable.getPreferredSize());
 
+		JScrollPane jsSelectedTable = new JScrollPane(jtSelectedTable);
+		jsSelectedTable.setPreferredSize(jtSelectedTable.getPreferredSize());
+		
 		this.add(jpNorth, BorderLayout.NORTH);
 		this.add(jsTable, BorderLayout.CENTER);
+		this.add(jsSelectedTable,BorderLayout.WEST);
 		this.add(jpSouth, BorderLayout.SOUTH);
+		
 	}
 	
 	private void initializeAttr() {
 		cards = new LinkedList<Card>();
-		jtQuantity = new JTextField();
-		
-		jlblLvl = new JLabel("กั Lv.");
-		
+				
 		jcbTypes = new JComboBox<String>(new String[]{"N Card", "HN Card", "R Card", "Slime", "M.Slime"});
-		jcbTypes.setSelectedItem("Slime");
 		jcbTypes.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				checkValidSelection();
 				
+				showCards(jcbTypes.getSelectedIndex());
+
 			}
 		});
 		
-		jcbLevels = new JComboBox<Integer>(Card.getLevelsArray(40));
-		jcbLevels.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				checkValidSelection();
-			}
-		});
+		jcbTypes.setPreferredSize(new Dimension(160, (int)jcbTypes.getPreferredSize().getHeight()));
 		
+		/***********CardsTable***********/
 		Object[] titles = {"Level", "Type", "Exp"};
 		Object[][] data = {};
 		dtmCardsTable = new DefaultTableModel(data,titles){
@@ -100,48 +92,53 @@ public class CardsListPanel extends JPanel{
 		
 		
 		jtCardsTable = new JTable(dtmCardsTable);
+		jtCardsTable.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked (MouseEvent arg0) {
+				if(arg0.getClickCount() > 1){
+					int row = jtCardsTable.getSelectedRow();
+					Object[] rowData = new Object[3];
+					for(int i = 0; i < 3; i++){
+						rowData[i] = dtmCardsTable.getValueAt(row, i);
+						
+					}
+					
+					//dtmSelectedTable.addRow(rowData);
+					addCard(row+1,(String)rowData[1]);
+					
+				}
+			}
+		});
 		jtCardsTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 		jtCardsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		jtCardsTable.setRowSelectionAllowed(true);
 		jtCardsTable.setFocusable(false);
 		jtCardsTable.setShowVerticalLines(false);
 		
-		jtQuantity.setColumns(3);
-		jtQuantity.setFont(new Font(jtQuantity.getFont().getName(), Font.PLAIN, 15));
-		jtQuantity.setHorizontalAlignment(JTextField.RIGHT);
-		jtQuantity.setDocument(new PlainDocument(){
-			/**
-			 * 
-			 */
-			private static final long serialVersionUID = -9014996937601801768L;
-
+		
+		Object[] titles1 = {"Level", "Type", "Quantity"};
+		Object[][] data1 = {};
+		dtmSelectedTable = new DefaultTableModel(data1,titles1){
 			@Override
-			public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
-
-				if(getLength() + str.length() > 3){
-					str = str.substring(0, 3 - getLength());
-				}
-				
-				try{
-					Integer.parseInt(str);
-					super.insertString(offs, str, a);
-				} catch (NumberFormatException e){
-					
-				}
+			public boolean isCellEditable(int row, int column) {
+				return false;
+			}
+		};
+		
+		
+		jtSelectedTable = new JTable(dtmSelectedTable);
+		jtSelectedTable.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if(e.getClickCount() == 2)
+					removeCard();
 			}
 		});
-		
-		jtQuantity.setText("1");
-		
-		jbUse = new JButton("Use");
-		jbUse.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				addCard();
-				
-			}
-		});
+		jtSelectedTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+		jtSelectedTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		jtSelectedTable.setRowSelectionAllowed(true);
+		jtSelectedTable.setFocusable(false);
+		jtSelectedTable.setShowVerticalLines(false);
 		
 		jbRemove = new JButton("Remove");
 		jbRemove.addActionListener(new ActionListener() {
@@ -161,18 +158,50 @@ public class CardsListPanel extends JPanel{
 				refresh();
 			}
 		});
+		
+		
+		jcbTypes.setSelectedItem("Slime");
 	}
 	
-	private void checkValidSelection(){
-		int index = jcbTypes.getSelectedIndex();
-		if((index == Card.N || index == Card.SLIME || index == Card.HN) && jcbLevels.getSelectedIndex() > 29){
-			jcbLevels.setSelectedIndex(29);
-		}	
+	
+	private void showCards(int type){
+		dtmCardsTable.getDataVector().removeAllElements();
+		dtmCardsTable.fireTableDataChanged();
+		if(type == Card.SLIME){
+			for(int i = 0; i < 30; i++){
+				int lv = i+1;
+				dtmCardsTable.addRow(new Object[]{"Lv." + lv, "Slime", Card.slimeExp(lv)});
+			}
+		}
+		else if (type == Card.N){
+			for(int i = 0; i < 30; i++){
+				int lv = i+1;
+				dtmCardsTable.addRow(new Object[]{"Lv." + lv, "N Card", Card.nExp(lv)});
+			}
+		}
+		else if (type == Card.HN){
+			for(int i = 0; i < 40; i++){
+				int lv = i+1;
+				dtmCardsTable.addRow(new Object[]{"Lv." + lv, "HN Card", Card.hnExp(lv)});
+			}
+		}
+		else if (type == Card.R){
+			for(int i = 0; i < 40; i++){
+				int lv = i+1;
+				dtmCardsTable.addRow(new Object[]{"Lv." + lv, "R Card", Card.rExp(lv)});
+			}
+		}
+		else if (type == Card.METAL_SLIME){
+			for(int i = 0; i < 40; i++){
+				int lv = i+1;
+				dtmCardsTable.addRow(new Object[]{"Lv." + lv, "M Slime", Card.mslimeExp(lv)});
+			}
+		}
 	}
 	
 	private void refresh(){
-		dtmCardsTable.getDataVector().removeAllElements();
-		dtmCardsTable.fireTableDataChanged();
+		dtmSelectedTable.getDataVector().removeAllElements();
+		dtmSelectedTable.fireTableDataChanged();
 		for(int i = 0; i < cards.size(); i++){
 			Card c = cards.get(i);
 			String type = "";
@@ -199,33 +228,28 @@ public class CardsListPanel extends JPanel{
 					exp = Card.mslimeExp(c.getLevel());
 					break;
 			}
-			dtmCardsTable.addRow(new Object[]{"Lv." + c.getLevel(), type, exp});
+			dtmSelectedTable.addRow(new Object[]{"Lv." + c.getLevel(), type, exp});
 		}
 	}
 	
-	public void addCard(){
-		if(!jtQuantity.getText().isEmpty()){
-			int q = Integer.parseInt(jtQuantity.getText());
-			int lv = (int)jcbLevels.getSelectedItem();
-			int t = jcbTypes.getSelectedIndex();
-			
-			while(q > 0){
-				cards.addFirst(new Card(lv, t));
-				q--;
-			}
-			refresh();
-			jtQuantity.setText("1");
-		}
+	public void addCard(int lv, String type){
+		
+		
+		cards.addFirst(new Card(lv, Card.getType(type)));
+		
+		refresh();
+		
+		
 	}
 	
 	public void removeCard(){
-		int index = jtCardsTable.getSelectedRow();
+		int index = jtSelectedTable.getSelectedRow();
 		if(index > -1){
 			cards.remove(index);
 			refresh();
-			if(jtCardsTable.getRowCount() > 0){
-				while(index >= jtCardsTable.getRowCount()) index--;
-				jtCardsTable.setRowSelectionInterval(index, index);
+			if(jtSelectedTable.getRowCount() > 0){
+				while(index >= jtSelectedTable.getRowCount()) index--;
+				jtSelectedTable.setRowSelectionInterval(index, index);
 			}
 		}
 	}

@@ -33,7 +33,7 @@ public class UpgradeCalcGUI extends JFrame {
 	public UpgradeCalcGUI()  {
 		setTitle("Upgrade Calculater");
 		setLayout(new BorderLayout());
-		setSize(730,580);
+		setSize(870,700);
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLocationRelativeTo(null);
@@ -45,7 +45,6 @@ public class UpgradeCalcGUI extends JFrame {
 		JPanel jpWest = new JPanel();
 		jpWest.setLayout(new FlowLayout(FlowLayout.LEFT));
 		jpWest.setPreferredSize(new Dimension(135, (int)jpWest.getPreferredSize().getHeight()));
-		
 		
 		JPanel jpFrom = new JPanel(new GridLayout(0,1));
 		JPanel jpTo = new JPanel(new GridLayout(0,1));
@@ -80,7 +79,6 @@ public class UpgradeCalcGUI extends JFrame {
 		jlTo = new JLabel("To level");
 		jlTo.setPreferredSize(jlFrom.getPreferredSize());
 		
-
 		jcbFromLevel = new JComboBox<Integer>(Card.getLevelsArray());
 		jcbFromLevel.addActionListener(new ActionListener() {
 			@Override
