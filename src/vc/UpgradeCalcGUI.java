@@ -178,41 +178,83 @@ public class UpgradeCalcGUI extends JFrame {
 				jtaResult.append("\n\n");
 			}
 		}
+		
+		else 
+			calculateMinimunSlime(expNeeded);
 	}
 	
 	private void calculateMinimunSlime(int expNeeded){
 		
 		int levelOfSlime = 1;
+		int slimeNeeded = 1;
+		int arcana = 0;
+		int slimeExp = Card.slimeExp(levelOfSlime);
+		int expHave = 0;
 		
-		int lv30Slime = Card.slimeExp(30);
-		int expOfSlime = Card.slimeExp(levelOfSlime);
-		int slimeNeeded = 0;
-		int nCardNeeded = 0;
+		boolean calculated = false;
 		
-		int expCalc = expNeeded;
-		
-		while(expCalc > 0){
-			expCalc -= 100;
-			nCardNeeded++;
-			
-			if((nCardNeeded * 100) >= expOfSlime){
-				slimeNeeded++;
-				nCardNeeded = 0;
+
+		// Use one card with no arcana
+		for(int i = 0; i < 30; i++){
+			expHave = slimeExp;
+			if(slimeExp >= expNeeded){
+				calculated = true;
+				break;
+			}
+			else{
+				levelOfSlime++;
+				slimeExp = Card.slimeExp(levelOfSlime);
 			}
 		}
 		
+		// Use one card with 1 arcana
 		
-		jtaResult.append(slimeNeeded + " [Lv." + levelOfSlime + " Slimes]\n");
-		jtaResult.append(nCardNeeded + " [Lv.1 N Cards]\n");
+		if (!calculated){
 			
-		slimeNeeded = 0;
-		expCalc = expNeeded;
-		while(expCalc > 0){
-			expCalc -= expOfSlime;
-			slimeNeeded++;
+			levelOfSlime = 1;
+			slimeExp = Card.slimeExp(levelOfSlime);
+			arcana = 1;
+			
+			for(int i = 0; i < 30; i++){
+				expHave = slimeExp * (2 * arcana);
+				if(expHave >= expNeeded){
+					calculated = true;
+					break;
+				}
+				else{
+					levelOfSlime++;
+					slimeExp = Card.slimeExp(levelOfSlime);
+				}
+			}
 		}
-		jtaResult.append("\n     or\n\n");
-		jtaResult.append(slimeNeeded + " [Lv.30 Slimes]\n");
+		
+		// Use >=1 card with 2 arcana
+		
+		while (!calculated){
+			levelOfSlime = 1;
+			slimeExp = Card.slimeExp(levelOfSlime);
+			arcana = 2;
+			for(int i = 0; i < 30; i++){
+				expHave = slimeNeeded * slimeExp * (2 * arcana); 
+				if(expHave >= expNeeded){
+					calculated = true;
+					break;
+				}
+				else{
+					levelOfSlime++;
+					slimeExp = Card.slimeExp(levelOfSlime);
+				}
+			}
+			
+			if(!calculated)
+				slimeNeeded++;
+		}
+		
+		jtaResult.append("Exp have: " + expHave +"\n");
+		
+		jtaResult.append("Need " + slimeNeeded + " Lv." + levelOfSlime + " Slimes + " + arcana + " Arcana\n");
+		
+		
 		
 	}
 }
