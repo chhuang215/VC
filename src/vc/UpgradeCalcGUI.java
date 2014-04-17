@@ -31,7 +31,7 @@ public class UpgradeCalcGUI extends JFrame {
 	private CardsListPanel pCardList;
 	
 	public UpgradeCalcGUI()  {
-		setTitle("Upgrade Calculater");
+		setTitle("Upgrade Calculator");
 		setLayout(new BorderLayout());
 		setSize(870,700);
 		setResizable(false);
