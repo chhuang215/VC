@@ -66,8 +66,6 @@ public class UpgradeCalcGUI extends JFrame {
 		jpMain.add(pCardList, BorderLayout.EAST);
 		
 		getContentPane().add(jpMain, BorderLayout.CENTER);
-		
-		setVisible(true);
 	}
 	
 	private void initializeComponents(){

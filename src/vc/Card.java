@@ -83,8 +83,6 @@ public class Card{
 		}
 		
 	}
-
-
 	
 	public static int nExp(int level){
 		

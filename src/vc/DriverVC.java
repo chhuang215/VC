@@ -8,7 +8,8 @@ public class DriverVC {
 		SwingUtilities.invokeLater(new Runnable() {
 			
 			public void run() {
-				new UpgradeCalcGUI();	
+				UpgradeCalcGUI vc = new UpgradeCalcGUI();
+				vc.setVisible(true);
 			}
 		});
 
