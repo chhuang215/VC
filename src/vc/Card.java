@@ -1,6 +1,7 @@
 package vc;
 
-public class Card {	
+
+public class Card{	
 	
 	public final static int EXP_CHART[] = {
 		0, 100, 207, 321, 444, 575, 715, 865, 1026, 1198, //1 - 10
@@ -46,7 +47,7 @@ public class Card {
 		return EXP_CHART[level - 1];
 	}
 	
-	public static int getType(String t){
+	public static int getTypeInteger(String t){
 
 		String temp = t.toLowerCase();
 		if(temp.startsWith("n")){
@@ -64,6 +65,26 @@ public class Card {
 		
 		return -1;
 	}
+	
+	public static String getTypeString(int t){
+		switch(t){
+			case Card.N: 
+				return "N Card";
+			case Card.HN:
+				return "HN Card";
+			case Card.R:
+				return "R Card";
+			case Card.SLIME:
+				return "Slime";
+			case Card.METAL_SLIME:
+				return "Metel Slime";
+			default:
+				return null;
+		}
+		
+	}
+
+
 	
 	public static int nExp(int level){
 		
@@ -104,4 +125,6 @@ public class Card {
 	public static Integer[] getLevelsArray(){
 		return getLevelsArray(80);
 	}
+
+
 }

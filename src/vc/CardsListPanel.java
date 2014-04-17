@@ -3,7 +3,6 @@ package vc;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -13,22 +12,16 @@ import java.util.LinkedList;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.PlainDocument;
 
 public class CardsListPanel extends JPanel{
 
 	private static final long serialVersionUID = 1L;
-	
-	private LinkedList<Card> cards;
+	private LinkedList<LinkedList<Card>> cardDeck;
 	private JComboBox<String> jcbTypes;
 	private JButton jbRemove;
 	private JButton jbClear;
@@ -47,7 +40,6 @@ public class CardsListPanel extends JPanel{
 		JPanel jpSouth = new JPanel(new GridLayout(1,2,5,5));
 		
 		jpNorth.add(jcbTypes);
-		//jpSouth.add(jbRemove);
 		jpSouth.add(jbClear);
 		
 		JScrollPane jsTable = new JScrollPane(jtCardsTable);
@@ -63,14 +55,14 @@ public class CardsListPanel extends JPanel{
 		
 	}
 	
+	@SuppressWarnings("serial")
 	private void initializeAttr() {
-		cards = new LinkedList<Card>();
-				
+		cardDeck = new LinkedList<LinkedList<Card>>();		
+		
 		jcbTypes = new JComboBox<String>(new String[]{"N Card", "HN Card", "R Card", "Slime", "M.Slime"});
 		jcbTypes.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				
 				showCards(jcbTypes.getSelectedIndex());
 
 			}
@@ -95,17 +87,19 @@ public class CardsListPanel extends JPanel{
 		jtCardsTable.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked (MouseEvent arg0) {
-				if(arg0.getClickCount() > 1){
+				if(arg0.getClickCount() % 2 == 0){
 					int row = jtCardsTable.getSelectedRow();
 					Object[] rowData = new Object[3];
+					int cardLv = row + 1;
+					
 					for(int i = 0; i < 3; i++){
 						rowData[i] = dtmCardsTable.getValueAt(row, i);
 						
 					}
 					
-					//dtmSelectedTable.addRow(rowData);
-					addCard(row+1,(String)rowData[1]);
+					int type = Card.getTypeInteger((String)rowData[1]);
 					
+					addCard(cardLv,type);
 				}
 			}
 		});
@@ -130,7 +124,7 @@ public class CardsListPanel extends JPanel{
 		jtSelectedTable.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				if(e.getClickCount() == 2)
+				if(e.getClickCount() % 2 == 0)
 					removeCard();
 			}
 		});
@@ -154,7 +148,7 @@ public class CardsListPanel extends JPanel{
 		jbClear.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				cards.clear();
+				cardDeck.clear();
 				refresh();
 			}
 		});
@@ -202,41 +196,36 @@ public class CardsListPanel extends JPanel{
 	private void refresh(){
 		dtmSelectedTable.getDataVector().removeAllElements();
 		dtmSelectedTable.fireTableDataChanged();
-		for(int i = 0; i < cards.size(); i++){
-			Card c = cards.get(i);
+		
+		for (int i = 0; i < cardDeck.size(); i++){
+			LinkedList<Card> anCardDeck = cardDeck.get(i);
+			Card c = anCardDeck.get(0);
 			String type = "";
-			int exp = 0;
-			switch(c.getType()){
-				case Card.N: 
-					type = "N Card";
-					exp = Card.nExp(c.getLevel());
-					break;
-				case Card.HN:
-					type = "HN Card";
-					exp = Card.hnExp(c.getLevel());
-					break;
-				case Card.R:
-					type = "R Card";
-					exp = Card.rExp(c.getLevel());
-					break;
-				case Card.SLIME:
-					type = "Slime";
-					exp = Card.slimeExp(c.getLevel());
-					break;
-				case Card.METAL_SLIME:
-					type = "Metel Slime";
-					exp = Card.mslimeExp(c.getLevel());
-					break;
-			}
-			dtmSelectedTable.addRow(new Object[]{"Lv." + c.getLevel(), type, exp});
+			int quantity = anCardDeck.size();
+			
+			type = Card.getTypeString(c.getType());
+			
+			dtmSelectedTable.addRow(new Object[]{"Lv. " + c.getLevel(), type, quantity});
 		}
 	}
 	
-	public void addCard(int lv, String type){
+	public void addCard(int lv, int type){
 		
+		if(!cardDeck.isEmpty()){
+			for(int i = 0; i < cardDeck.size(); i++){
+				LinkedList<Card> tempCardDeck = cardDeck.get(i);
+				Card c = tempCardDeck.get(0);
+				if(c.getLevel() == lv && c.getType() == type){
+					tempCardDeck.addFirst(new Card(lv, type));
+					refresh();
+					return;
+				}
+			}
+		}
 		
-		cards.addFirst(new Card(lv, Card.getType(type)));
-		
+		LinkedList<Card> newCardDeck = new LinkedList<Card>();
+		newCardDeck.addFirst(new Card(lv, type));
+		cardDeck.addFirst(newCardDeck);
 		refresh();
 		
 		
@@ -245,7 +234,13 @@ public class CardsListPanel extends JPanel{
 	public void removeCard(){
 		int index = jtSelectedTable.getSelectedRow();
 		if(index > -1){
-			cards.remove(index);
+			
+			cardDeck.get(index).removeLast();
+			
+			if(cardDeck.get(index).isEmpty()){
+				cardDeck.remove(index);
+			}
+			
 			refresh();
 			if(jtSelectedTable.getRowCount() > 0){
 				while(index >= jtSelectedTable.getRowCount()) index--;
@@ -254,7 +249,7 @@ public class CardsListPanel extends JPanel{
 		}
 	}
 	
-	public LinkedList<Card> getCardList(){
-		return cards;
+	public LinkedList<LinkedList<Card>> getCardList(){
+		return cardDeck;
 	}
 }

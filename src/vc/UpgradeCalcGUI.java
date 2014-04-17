@@ -124,35 +124,42 @@ public class UpgradeCalcGUI extends JFrame {
 	
 	
 	private void calculate(int from, int to){
-		LinkedList<Card> cards = pCardList.getCardList();
+		LinkedList<LinkedList<Card>> cardDeck = pCardList.getCardList();
+		
 		int expHave = 0;
 		int stillNeeded = 0;
 		jtaResult.setText("");
 		
 		
-		if(!cards.isEmpty()){
-			for(int i = 0; i < cards.size(); i++){
-				Card c = cards.get(i);
-				switch(c.getType()){
-					case Card.N: 
-						expHave += Card.nExp(c.getLevel());
-						break;
-					case Card.HN:
-	
-						expHave += Card.hnExp(c.getLevel());
-						break;
-					case Card.R:
-	
-						expHave += Card.rExp(c.getLevel());
-						break;
-					case Card.SLIME:
-	
-						expHave += Card.slimeExp(c.getLevel());
-						break;
-					case Card.METAL_SLIME:
-	
-						expHave += Card.mslimeExp(c.getLevel());
-						break;
+		if(!cardDeck.isEmpty()){
+			for(int i = 0; i < cardDeck.size(); i++){
+				
+				LinkedList<Card> cards = cardDeck.get(i);
+				
+				for(int j = 0; j < cards.size(); j++){
+					
+					Card c = cards.get(j);					
+					switch(c.getType()){
+						case Card.N: 
+							expHave += Card.nExp(c.getLevel());
+							break;
+						case Card.HN:
+		
+							expHave += Card.hnExp(c.getLevel());
+							break;
+						case Card.R:
+		
+							expHave += Card.rExp(c.getLevel());
+							break;
+						case Card.SLIME:
+		
+							expHave += Card.slimeExp(c.getLevel());
+							break;
+						case Card.METAL_SLIME:
+		
+							expHave += Card.mslimeExp(c.getLevel());
+							break;
+					}
 				}
 				
 			}
@@ -168,7 +175,7 @@ public class UpgradeCalcGUI extends JFrame {
 		
 		stillNeeded = expNeeded - expHave;
 		
-		if(!cards.isEmpty()){
+		if(!cardDeck.isEmpty()){
 			if(stillNeeded > 0 ){
 				jtaResult.append("Still need: " + stillNeeded);
 				jtaResult.append("\n\n");
