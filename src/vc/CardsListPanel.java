@@ -87,7 +87,13 @@ public class CardsListPanel extends JPanel{
 		jtCardsTable.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked (MouseEvent arg0) {
-				if(arg0.getClickCount() % 2 == 0){
+				
+				int click = arg0.getModifiers();
+				int index = jtCardsTable.rowAtPoint(arg0.getPoint());
+				
+				jtCardsTable.setRowSelectionInterval(index,index);
+				
+				if(click == MouseEvent.BUTTON3_MASK || (click == MouseEvent.BUTTON1_MASK && arg0.getClickCount() % 2 == 0)){
 					int row = jtCardsTable.getSelectedRow();
 					Object[] rowData = new Object[3];
 					int cardLv = row + 1;
@@ -124,7 +130,12 @@ public class CardsListPanel extends JPanel{
 		jtSelectedTable.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				if(e.getClickCount() % 2 == 0)
+				
+				int click = e.getModifiers();
+				int index = jtCardsTable.rowAtPoint(e.getPoint());
+				jtSelectedTable.setRowSelectionInterval(index,index);
+				
+				if(click == MouseEvent.BUTTON3_MASK || (click == MouseEvent.BUTTON1_MASK && e.getClickCount() % 2 == 0))
 					removeCard();
 			}
 		});
